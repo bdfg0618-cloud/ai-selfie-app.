@@ -39,7 +39,7 @@ if (!KEY) {
     setGeneratedImage(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+       const ai = new GoogleGenAI({ apiKey: KEY });
 
       const imageParts = await Promise.all(
         uploadedFiles.map(async (file) => {
@@ -163,4 +163,5 @@ Additional Directives:
 
 
 export default App;
+
 
