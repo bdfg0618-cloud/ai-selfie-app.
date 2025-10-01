@@ -1,0 +1,28 @@
+import React from 'react';
+
+interface ResultDisplayProps {
+  imageUrl: string;
+}
+
+export const ResultDisplay: React.FC<ResultDisplayProps> = ({ imageUrl }) => {
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mt-8">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">3. 완성된 AI 셀카</h2>
+      <div className="mb-6 rounded-lg overflow-hidden shadow-md border border-gray-200">
+        <img src={imageUrl} alt="Generated AI Selfie" className="w-full h-auto object-contain" />
+      </div>
+      <div className="text-center">
+        <a
+          href={imageUrl}
+          download="ai-selfie.png"
+          className="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white font-bold text-lg rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-transform transform hover:scale-105"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          사진 저장하기
+        </a>
+      </div>
+    </div>
+  );
+};

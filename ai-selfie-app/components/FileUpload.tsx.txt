@@ -1,0 +1,131 @@
+import React, { useState, useCallback, useMemo } from 'react';
+
+interface FileUploadProps {
+  onFilesChange: (files: File[]) => void;
+}
+
+const MAX_FILES = 5;
+
+const FilePreview: React.FC<{ file: File; onRemove: () => void }> = ({ file, onRemove }) => {
+  const objectUrl = useMemo(() => URL.createObjectURL(file), [file]);
+
+  return (
+    <div className="relative group w-24 h-24 rounded-lg overflow-hidden shadow-md">
+      <img src={objectUrl} alt={file.name} className="w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+        <button
+          onClick={onRemove}
+          className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label="Remove image"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+export const FileUpload: React.FC<FileUploadProps> = ({ onFilesChange }) => {
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFiles = useCallback((incomingFiles: FileList | null) => {
+    if (!incomingFiles) return;
+    const newFiles = Array.from(incomingFiles).filter(
+      (file) => file.type.startsWith('image/')
+    );
+
+    setFiles(prevFiles => {
+      const updatedFiles = [...prevFiles, ...newFiles].slice(0, MAX_FILES);
+      onFilesChange(updatedFiles);
+      return updatedFiles;
+    });
+  }, [onFilesChange]);
+
+  const removeFile = useCallback((index: number) => {
+    setFiles(prevFiles => {
+      const updatedFiles = prevFiles.filter((_, i) => i !== index);
+      onFilesChange(updatedFiles);
+      return updatedFiles;
+    });
+  }, [onFilesChange]);
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    handleFiles(e.dataTransfer.files);
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(e.target.files);
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">1. 사진을 올려주세요</h2>
+      <p className="text-gray-600 mb-4">합성할 인물의 사진을 1장 이상 올려주세요. (최대 {MAX_FILES}장)</p>
+
+      <div
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-300 ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 bg-gray-50'}`}
+      >
+        <input
+          type="file"
+          id="file-upload"
+          multiple
+          accept="image/*"
+          onChange={handleFileChange}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <label htmlFor="file-upload" className="cursor-pointer">
+          <div className="flex flex-col items-center justify-center">
+            <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <p className="text-gray-700 font-semibold">드래그 & 드롭 또는 클릭하여 사진 선택</p>
+            <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP</p>
+          </div>
+        </label>
+      </div>
+      
+      <div className="mt-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg">
+          <p className="text-sm text-blue-800">
+            <span className="font-bold">팁:</span> 원본 사진 속 인물의 얼굴이 정면에서 선명하게 보일수록 동일성이 더 정확하게 재현됩니다.
+          </p>
+      </div>
+
+      {files.length > 0 && (
+        <div className="mt-6">
+          <div className="flex flex-wrap gap-4">
+            {files.map((file, index) => (
+              <FilePreview key={index} file={file} onRemove={() => removeFile(index)} />
+            ))}
+          </div>
+           <p className="mt-4 text-sm text-center text-gray-600 font-medium">업로드된 사진 속 인물들의 얼굴, 옷차림 등 모든 디테일이 그대로 반영됩니다.</p>
+        </div>
+      )}
+    </div>
+  );
+};
