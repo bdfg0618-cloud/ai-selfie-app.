@@ -28,10 +28,11 @@ const App: React.FC = () => {
       setError('셀카 배경과 상황을 알려주세요.');
       return;
     }
-    if (!process.env.API_KEY) {
-      setError("API 키가 설정되지 않았습니다. 환경 변수를 확인해주세요.");
-      return;
-    }
+const KEY = import.meta.env.VITE_API_KEY as string | undefined;
+if (!KEY) {
+  setError("API 키가 설정되지 않았습니다. 환경 변수를 확인해주세요.");
+  return;
+}
 
     setIsLoading(true);
     setError(null);
@@ -162,3 +163,4 @@ Additional Directives:
 
 
 export default App;
+
