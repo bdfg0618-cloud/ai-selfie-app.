@@ -2,8 +2,9 @@ import { GoogleGenAI, Chat } from "@google/genai";
 
 // FIX: Adhere to Gemini API guidelines by using process.env.API_KEY.
 // The API key is assumed to be pre-configured and accessible in the execution environment.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
+const ai = new GoogleGenAI({
+  apiKey: import.meta.env.VITE_API_KEY as string,
+});
 export function startChatSession(): Chat {
   return ai.chats.create({
     model: 'gemini-2.5-flash',
@@ -29,3 +30,4 @@ export const getMimeType = (filename: string): string | null => {
             return null;
     }
 }
+
